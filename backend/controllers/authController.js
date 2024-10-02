@@ -89,6 +89,7 @@ export const fazerLogin = async (req, res) => {
             imagem_banner: user.imagem_banner,
             bio: user.bio,
             link: user.link,
+            posts_curtidos: user.posts_curtidos,
         })
 
     } catch (error) {

@@ -60,6 +60,14 @@ const userSchema = new mongoose.Schema({
         default: "",
     },
 
+    posts_curtidos: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Post',
+            default: [],
+        }
+    ]
+
 },{timestamps: true})
 
 const User = mongoose.model("User", userSchema);
