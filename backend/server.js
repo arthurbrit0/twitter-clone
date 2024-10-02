@@ -6,6 +6,7 @@ import {v2 as cloudinary} from 'cloudinary';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import postRoutes from './routes/postRoutes.js';
+import notificacoesRoutes from './routes/notificacoesRoutes.js';
 
 import connectMongoDB from './db/connectMongoDB.js';
 
@@ -27,6 +28,7 @@ app.use(cookieParser())
 app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/posts", postRoutes)
+app.use("/api/notificacoes", notificacoesRoutes)
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}!`)
