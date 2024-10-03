@@ -1,3 +1,5 @@
+// componente para roda de carregamento
+
 const LoadingSpinner = ({ size = "md" }) => {
 	const sizeClass = `loading-${size}`;
 

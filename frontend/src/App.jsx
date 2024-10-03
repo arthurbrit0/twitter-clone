@@ -12,7 +12,7 @@ import LoadingSpinner from './components/common/LoadingSpinner'
 
 function App() {
 
-  const { data:authUser, isLoading } = useQuery({
+  const { data:authUser, isLoading } = useQuery({ // usando o useQuery para fazer uma query no banco de dados para buscar o usuario logado (authUser)
     queryKey: ['authUser'],
     queryFn: async () => {
       try {
@@ -39,7 +39,7 @@ function App() {
     retry:false,
   })
 
-  if(isLoading) {
+  if(isLoading) { // se o usuario ainda estiver sendo buscado no banco, carregaremos um spinner de loading
     return (
       <div className='h-screen flex justify-center items-center'>
         <LoadingSpinner size='lg'/>
@@ -48,13 +48,13 @@ function App() {
   }
 
   return (
-    <div className="flex max-w-6xl mx-auto">
-      {authUser && <Sidebar />}
+    <div className="flex max-w-6xl mx-auto"> {/* Definindo as rotas da aplicação */}
+      {authUser && <Sidebar />} {/* renderizacao condicional: so carregamos a sidebar, que é um componente comum, se o usuario estiver logado */}
         <Routes>
-          <Route path='/' element={authUser ? <HomePage /> : <Navigate to='/login'/> }/>
-          <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />}/>
-          <Route path='/cadastro' element={!authUser ? <CadastroPage /> : <Navigate to='/' />}/>
-          <Route path='/notificacoes' element={authUser ? <NotificationPage />: <Navigate to='/login'/> } />
+          <Route path='/' element={authUser ? <HomePage /> : <Navigate to='/login'/> }/> {/* Protegemos todas as rotas com o authUser. se ele estiver logado, ou seja, se a funcao */}
+          <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />}/> {/* de fetch retornar um usuario, ele podera acessar as rotas da aplicacoa */}
+          <Route path='/cadastro' element={!authUser ? <CadastroPage /> : <Navigate to='/' />}/> {/* Se o usuario não estiver logado, e tentar acecssar a home, ele é direcionado para a pag de login */}
+          <Route path='/notificacoes' element={authUser ? <NotificationPage />: <Navigate to='/login'/> } /> {/* Se o usuário já estiver logado e tentar acessar o login ou o cadastro, ele é direcionado para ahome */}
           <Route path='/perfil/:usuario' element={authUser ? <ProfilePage /> : <Navigate to='/login'/> }/>
         </Routes>
       {authUser && <PainelDireito />}

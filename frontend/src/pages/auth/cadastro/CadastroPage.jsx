@@ -18,17 +18,17 @@ const CadastroPage = () => {
 		nome_usuario: "",
 		nome_completo: "",
 		senha: "",
-	});
+	}); // inicializando os dados do formulario de cadastro, com as propriedades necessarias para registrar o usuario no banco de dados
 	
 	const { mutate:cadastrar, isError, isPending, error} = useMutation({
 		mutationFn: async({email, nome_usuario, nome_completo, senha}) => {
 			try {
-				const res = await fetch("/api/auth/cadastro", {
+				const res = await fetch("/api/auth/cadastro", { // fazendo uma requisicao do tipo post para o backend
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json"
 					},
-					body: JSON.stringify({email, nome_usuario, nome_completo, senha})
+					body: JSON.stringify({email, nome_usuario, nome_completo, senha}) // passando no corpo da requisicao os dados informados no formulario de registro
 				})
 	
 				const data = await res.json();
@@ -51,12 +51,12 @@ const CadastroPage = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		cadastrar(formData)
+		cadastrar(formData) // quando o formulario de registro for enviado, chamamos a funcao cadastrar, passando os dados informados
 	};
 
 	const handleInputChange = (e) => {
-		setFormData({ ...formData, [e.target.name]: e.target.value });
-	};
+		setFormData({ ...formData, [e.target.name]: e.target.value }); // como definimos o name dos inputs com o mesmo nome dos campos do formData, podemos
+	}; 																// atualizar o formData atual com os novos valores vindos dos inputs
 
 	return (
 		<div className='max-w-screen-xl mx-auto flex h-screen px-10'>
@@ -74,7 +74,7 @@ const CadastroPage = () => {
 							className='grow'
 							placeholder='Email'
 							name='email'
-							onChange={handleInputChange}
+							onChange={handleInputChange} // quando o input for mudado, vamos atualizar o formData com o valor informado
 							value={formData.email}
 						/>
 					</label>
@@ -86,8 +86,8 @@ const CadastroPage = () => {
 								className='grow '
 								placeholder='Usuário'
 								name='nome_usuario'
-								onChange={handleInputChange}
-								value={formData.username}
+								onChange={handleInputChange} // quando o input for mudado, vamos atualizar o formData com o valor informado
+								value={formData.nome_usuario}
 							/>
 						</label>
 						<label className='input input-bordered rounded flex items-center gap-2 flex-1'>
@@ -97,8 +97,8 @@ const CadastroPage = () => {
 								className='grow'
 								placeholder='Nome Completo'
 								name='nome_completo'
-								onChange={handleInputChange}
-								value={formData.fullName}
+								onChange={handleInputChange} // quando o input for mudado, vamos atualizar o formData com o valor informado
+								value={formData.nome_completo}
 							/>
 						</label>
 					</div>
@@ -109,8 +109,8 @@ const CadastroPage = () => {
 							className='grow'
 							placeholder='Senha'
 							name='senha'
-							onChange={handleInputChange}
-							value={formData.password}
+							onChange={handleInputChange} // quando o input for mudado, vamos atualizar o formData com o valor informado
+							value={formData.senha}
 						/>
 					</label>
 					<button className='btn rounded-full btn-primary text-white'>
@@ -121,7 +121,7 @@ const CadastroPage = () => {
 				<div className='flex flex-col lg:w-2/3 gap-2 mt-4'>
 					<p className='text-white text-lg'>Já tem uma conta?</p>
 					<Link to='/login'>
-						<button className='btn rounded-full btn-primary text-white btn-outline w-full'>Login</button>
+						<button className='btn rounded-full btn-primary text-white btn-outline w-full'>Login</button> {/* botão que redireciona para a pagina de login */}
 					</Link>
 				</div>
 			</div>

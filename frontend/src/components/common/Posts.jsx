@@ -3,8 +3,8 @@ import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-const Posts = ({ feedType }) => {
-  const getPostEndpoint = () => {
+const Posts = ({ feedType }) => { // Posts recebe feedType como prop, que vem do componente Home
+  const getPostEndpoint = () => { // selecionando o post do endpoint para os casos das secoes para voce e seguindo
     switch (feedType) {
       case "forYou":
         return '/api/posts/todos';
@@ -18,10 +18,10 @@ const Posts = ({ feedType }) => {
   const POST_ENDPOINT = getPostEndpoint();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ['posts'],
+    queryKey: ['posts'], // definindo a query posts
     queryFn: async () => {
       try {
-        const res = await fetch(POST_ENDPOINT);
+        const res = await fetch(POST_ENDPOINT); // requisitaremos os posts de acordo com a secao que o usuario se encontra (para voce ou seguindo)
         const data = await res.json();
 
         if (!res.ok) {
@@ -37,7 +37,7 @@ const Posts = ({ feedType }) => {
   });
 
   useEffect(() => {
-    refetch();
+    refetch(); // para cada vez que a secao do feed for atualizada, a query sera requisitada novamente
   }, [feedType, refetch]);
 
   return (
@@ -52,7 +52,7 @@ const Posts = ({ feedType }) => {
       {(!isLoading && !isRefetching) && data?.length === 0 && <p className='text-center my-4'>Sem posts por aqui. Até! 👻</p>}
       {!isLoading && !isRefetching && data && (
         <div>
-          {data.map((post) => (
+          {data.map((post) => ( // para cada post da secao, enviaremos ao componente Post o post da secao como props, para que ele seja renderizado la
             <Post key={post._id} post={post} />
           ))}
         </div>

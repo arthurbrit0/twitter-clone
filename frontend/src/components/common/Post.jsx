@@ -9,32 +9,34 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from "./LoadingSpinner";
 
-const Post = ({ post }) => {
-  const [comentario, setComentario] = useState("");
+// componente de um unico post
+
+const Post = ({ post }) => { // recebe um post, passado como props do componente Posts, vindo do banco de dados
+  const [comentario, setComentario] = useState(""); // inicializamos o comentario do post como vazio
 
   const fetchAuthUser = async () => {
-    const res = await fetch('/api/auth/me');
+    const res = await fetch('/api/auth/me'); // funcao que pega as informacoes do usuario que está logado
     if (!res.ok) {
       throw new Error('Erro ao buscar usuário autenticado');
     }
-    return res.json();
+    return res.json(); // retorna as informacoes do usuario logado em formato json
   };
 
   const { data: authUser, isLoading: isAuthLoading, isError: isAuthError, error: authError } = useQuery({
-    queryKey: ['authUser'],
-    queryFn: fetchAuthUser,
+    queryKey: ['authUser'], // useQuery faz uma query no banco de dados, usando como chave authUser, para referenciar mais facil para futuras queries
+    queryFn: fetchAuthUser, // usa a funcao de query fetchAutchUser, ou seja, o useQuery vai fazer uma query de busca e vai recuperar os dados do usuario logado
   });
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // criando uma instancia do useQueryClient para manipular o cache
 
   const { mutate: deletarPost, isLoading: isDeleting, isError, error } = useMutation({
-    mutationFn: async () => {
+    mutationFn: async () => { // usando o mutate para manipular o banco de dados, no caso, deletar um post
       try {
         const res = await fetch(`/api/posts/deletar/${post._id}`, {
-          method: "DELETE"
-        });
+          method: "DELETE" // requisicao de um delete no id do post que foi passado como props (no componente Posts, todos os posts vão ser passados como props)
+        });                // ou seja, quando a função deletarPost, retornada pelo useMutation, for chamada (vai ser linkada a um botão), ela vai fazer uma requisição de delete do post que foi passado como props
 
-        const data = await res.json();
+        const data = await res.json(); // guardando a resposta do servidor em formato json
 
         if (!res.ok) {
           throw new Error(data.error || "Algo deu errado");
@@ -47,26 +49,26 @@ const Post = ({ post }) => {
       }
     },
     onSuccess: () => {
-      toast.success("Post deletado com sucesso!");
-      queryClient.invalidateQueries('posts');
-    },
+      toast.success("Post deletado com sucesso!"); // no caso de sucesso, exibimos um toast com mensagem de sucesso
+      queryClient.invalidateQueries('posts'); // alem disso, para atualizar a pagina dinamicamente, invalidamos a querie com chave posts
+    },                                        // isso faz com que, quando o programa tente pegar os dados de posts de novo, ele tenha que fazer uma nova querie, atualizando os dados (ja com o post  deletado)
     onError: (error) => {
       console.error('Erro ao deletar post:', error);
       toast.error(`Erro ao deletar post: ${error.message}`);
     },
   });
 
-  const postOwner = post.user;
-  const isLiked = false; 
+  const postOwner = post.user; // definindo o dono do post como o usuario que fez o post passado na prop
+  const isLiked = false; // isLiked começa como false (default)
 
-  const isMyPost = authUser && authUser._id === post.user._id;
+  const isMyPost = authUser && authUser._id === post.user._id; // booleano que indica se o usuario logado é o dono do post
 
   const formattedDate = "1h"; 
 
   const isCommenting = false;
 
   const handleDeletarPost = () => {
-    deletarPost();
+    deletarPost(); // essa funcao sera linkada ao botao de deletar 
   };
 
   const handlePostComment = (e) => {
@@ -98,18 +100,18 @@ const Post = ({ post }) => {
               <span>·</span>
               <span>{formattedDate}</span>
             </span>
-            {isMyPost && (
-              <span className='flex justify-end flex-1'>
-                {!isDeleting && <FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletarPost} />}
-                {isDeleting && (
-                  <LoadingSpinner size='sm' />
+            {isMyPost && ( // renderizacao condicional : o icone de deletar so vai aparecer pro usuario logado se o post for dele
+              <span className='flex justify-end flex-1'> 
+                {!isDeleting && <FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletarPost} />} 
+                {isDeleting && ( // botao que, ao clicar, deletara o post atual
+                  <LoadingSpinner size='sm' /> // se estiver deletando, vai carregar uma roda de carregamento
                 )}
               </span>
             )}
           </div>
           <div className='flex flex-col gap-3 overflow-hidden'>
             <span>{post.texto}</span>
-            {post.imagem && (
+            {post.imagem && ( // renderizacao condicional: se o post tiver uma imagem, vai carregar a img
               <img
                 src={post.imagem}
                 className='h-80 object-contain rounded-lg border border-gray-700'
@@ -121,24 +123,24 @@ const Post = ({ post }) => {
             <div className='flex gap-4 items-center w-2/3 justify-between'>
               <div
                 className='flex gap-1 items-center cursor-pointer group'
-                onClick={() => document.getElementById("comentarios_modal" + post._id).showModal()}
-              >
-                <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
+                onClick={() => document.getElementById("comentarios_modal" + post._id).showModal()} // quando o usuario clicar no icone de comentarios, aparecera o modal de coments
+              > 
+                <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' /> 
                 <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                  {post.comentarios.length}
+                  {post.comentarios.length} {/* mostrando a quantidade de comentarios que o post tem */}
                 </span>
               </div>
 
-              <dialog id={`comentarios_modal${post._id}`} className='modal border-none outline-none'>
-                <div className='modal-box rounded border border-gray-600'>
+              <dialog id={`comentarios_modal${post._id}`} className='modal border-none outline-none'> 
+                <div className='modal-box rounded border border-gray-600'> 
                   <h3 className='font-bold text-lg mb-4'>COMENTÁRIOS</h3>
                   <div className='flex flex-col gap-3 max-h-60 overflow-auto'>
-                    {post.comentarios.length === 0 && (
+                    {post.comentarios.length === 0 && ( // modal para carregar comentarios: se nao tiver comentarios, aparece um txt
                       <p className='text-sm text-slate-500'>
                         Não há comentários ainda 🤔 Seja o primeiro! 😉
                       </p>
                     )}
-                    {post.comentarios.map((comentario) => (
+                    {post.comentarios.map((comentario) => ( // para cada comentario, mostraremos o usuario que postou, seu avatar, usuario e o texto do comentario
                       <div key={comentario._id} className='flex gap-2 items-start'>
                         <div className='avatar'>
                           <div className='w-8 rounded-full'>
@@ -162,13 +164,13 @@ const Post = ({ post }) => {
                   </div>
                   <form
                     className='flex gap-2 items-center mt-4 border-t border-gray-600 pt-2'
-                    onSubmit={handlePostComment}
+                    onSubmit={handlePostComment} // quando o usuario enviar o comentario, o handler handlePostComment tratara o envio do texto
                   >
                     <textarea
                       className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none border-gray-800'
                       placeholder='Adicione um comentário...'
                       value={comentario}
-                      onChange={(e) => setComentario(e.target.value)}
+                      onChange={(e) => setComentario(e.target.value)} // setando o valor de comentario de acordo com o input do usuario no textarea
                     />
                     <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
                       {isCommenting ? (

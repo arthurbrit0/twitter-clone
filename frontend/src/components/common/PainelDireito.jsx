@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import { USERS_FOR_RIGHT_PANEL } from "../../utils/db/dummy";
 
+// componente do painel direito com usuarios sugeridos
+
 const PainelDireito = () => {
 	const isLoading = false;
 
@@ -11,7 +13,7 @@ const PainelDireito = () => {
 				<p className='font-bold'>Usuários sugeridos</p>
 				<div className='flex flex-col gap-4'>
 					{/* item */}
-					{isLoading && (
+					{isLoading && ( // caso esteja carregando, vai carregar componentes de carregamento do painel direito
 						<>
 							<RightPanelSkeleton />
 							<RightPanelSkeleton />
@@ -19,17 +21,17 @@ const PainelDireito = () => {
 							<RightPanelSkeleton />
 						</>
 					)}
-					{!isLoading &&
+					{!isLoading && // caso não esteja carregando, vai mapear cada usuario do banco de dados na seguinte funcao
 						USERS_FOR_RIGHT_PANEL?.map((user) => (
 							<Link
-								to={`/perfil/${user.nome_usuario}`}
+								to={`/perfil/${user.nome_usuario}`} // criar um link para os perfis do usuario
 								className='flex items-center justify-between gap-4'
 								key={user._id}
 							>
 								<div className='flex gap-2 items-center'>
 									<div className='avatar'>
 										<div className='w-8 rounded-full'>
-											<img src={user.imagem_perfil || "/avatar-placeholder.png"} />
+											<img src={user.imagem_perfil || "/avatar-placeholder.png"} /> 
 										</div>
 									</div>
 									<div className='flex flex-col'>
@@ -47,7 +49,7 @@ const PainelDireito = () => {
 										Seguir
 									</button>
 								</div>
-							</Link>
+							</Link> // no final, teremos cards com o avatar, usuario e nome, sendo tudo clicavel e redirecionavel para o perfil do user
 						))}
 				</div>
 			</div>

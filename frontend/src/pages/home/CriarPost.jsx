@@ -6,12 +6,13 @@ import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from 'react-toastify'; 
 
 const CriarPost = () => {
-  const [texto, setTexto] = useState("");
-  const [imagem, setImagem] = useState(null);
-  const imagemRef = useRef(null);
+  // componente para criar post 
+  const [texto, setTexto] = useState(""); // inicializando o texto do post
+  const [imagem, setImagem] = useState(null); // inicializando a imagem do post
+  const imagemRef = useRef(null); // criando um ref para referenciar o input (que vai estar escondido) para dar upload na imagem
 
   const fetchAuthUser = async () => {
-    const res = await fetch('/api/auth/me'); 
+    const res = await fetch('/api/auth/me'); // funcao que sera usada na query para pegar os dados do usuario logado
     if (!res.ok) {
       throw new Error('Erro ao buscar usuário autenticado');
     }
@@ -20,23 +21,23 @@ const CriarPost = () => {
 
   const { data: authUser, isLoading: isAuthLoading, isError: isAuthError, error: authError } = useQuery({
     queryKey: ['authUser'],
-    queryFn: fetchAuthUser,
+    queryFn: fetchAuthUser, // pegando os dados do usuario logado
   });
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // criando uma instancia do useQueryClient para manipular o cache
 
   const { mutate: criarPost, isLoading, isError, error } = useMutation({
-    mutationFn: async ({ texto, imagem }) => {
+    mutationFn: async ({ texto, imagem }) => { // funcao que vai receber o texto e a imagem do post
       try {
-        const res = await fetch('/api/posts/criar', {
+        const res = await fetch('/api/posts/criar', { // a funcao criarPost (mutate) fara uma requisicao para criar um post
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ texto, imagem })
+          body: JSON.stringify({ texto, imagem }) // passamos o texto e a imagem do post no corpo da requisicao
         });
 
-        const data = await res.json();
+        const data = await res.json(); 
 
         if (!res.ok) {
           throw new Error(data.error || "Algo deu errado");
@@ -49,10 +50,10 @@ const CriarPost = () => {
       }
     },
     onSuccess: () => {
-      setTexto("");
+      setTexto(""); // se o post for postado com sucesso, setaremos o texto e a imagem como vazios
       setImagem(null);
       toast.success("Post criado com sucesso!");
-      queryClient.invalidateQueries('posts'); 
+      queryClient.invalidateQueries('posts'); // invalidamos a query para atualizar os posts no componente Posts apos criarmos um post novo
     },
     onError: (error) => {
       console.error('Erro ao criar post:', error);
@@ -66,7 +67,7 @@ const CriarPost = () => {
       toast.error("O texto do post não pode estar vazio.");
       return;
     }
-    criarPost({ texto, imagem });
+    criarPost({ texto, imagem }); // chamando a funcao de criarPost ao clicar no botao para enviar o post, passando o texto e a imagem inseridas
   };
 
   const handleImgChange = (e) => {
@@ -95,14 +96,14 @@ const CriarPost = () => {
           className='textarea w-full p-0 text-lg resize-none border-none focus:outline-none border-gray-800'
           placeholder='O que está acontecendo?'
           value={texto}
-          onChange={(e) => setTexto(e.target.value)}
+          onChange={(e) => setTexto(e.target.value)} // quando o usuario digitar algo, o onChange setara o valor do state texto como o valor do input
         />
-        {imagem && (
+        {imagem && ( // se houver uma imagem, renderizaremos a imagem no corpo do texto
           <div className='relative w-72 mx-auto'>
             <IoCloseSharp
               className='absolute top-0 right-0 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
               onClick={() => {
-                setImagem(null);
+                setImagem(null); // x no canto superior direito para tirar a imagem do post
                 if (imagemRef.current) {
                   imagemRef.current.value = null;
                 }
@@ -116,11 +117,11 @@ const CriarPost = () => {
           <div className='flex gap-1 items-center'>
             <CiImageOn
               className='fill-primary w-6 h-6 cursor-pointer'
-              onClick={() => imagemRef.current && imagemRef.current.click()}
+              onClick={() => imagemRef.current && imagemRef.current.click()} // clicamos no input escondido que carrega o arquivo de imagem do usuario
             />
             <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer' />
           </div>
-          <input accept='image/*' type='file' hidden ref={imagemRef} onChange={handleImgChange} />
+          <input accept='image/*' type='file' hidden ref={imagemRef} onChange={handleImgChange} /> {/* input escondido que tem como funcao carregar as imagens do usuario */}
           <button className='btn btn-primary rounded-full btn-sm text-white px-4' disabled={isLoading}>
             {isLoading ? "Postando..." : "Postar"}
           </button>

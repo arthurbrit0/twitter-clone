@@ -9,12 +9,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Sidebar = () => {
 
-	const queryClient = useQueryClient();
+	const queryClient = useQueryClient(); // criando uma instancia do useQueryClient para manipular o cache
 
 	const { mutate:logout, isPending, isError, error } = useMutation({
 		mutationFn: async () => {
 			try {
-				const res = await fetch('/api/auth/logout', {
+				const res = await fetch('/api/auth/logout', { // fazemos uma requisicao de logout 
 					method: "POST",
 				})
 
@@ -33,7 +33,7 @@ const Sidebar = () => {
 			}
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({
+			queryClient.invalidateQueries({ // se o logout for realizado com sucesso, invalidamos a query para ela atualizar o estado atual do user, e redireciona-lo para a pag de login
 				queryKey: ['authUser'],
 			})
 		},
@@ -42,9 +42,10 @@ const Sidebar = () => {
 		}
 	}) 
 
-	const {data} = useQuery({queryKey: ['authUser']})
+	const {data} = useQuery({queryKey: ['authUser']}) // pegando os dados do usuario logado
 
 	return (
+		// sidebar esta dividida em botao para a home, para a pagina de notificacoes e perfil do usuario logado 
 		<div className='md:flex-[2_2_0] w-18 max-w-52'>
 			<div className='sticky top-0 left-0 h-screen flex flex-col border-r border-gray-700 w-20 md:w-full'>
 				<Link to='/' className='flex justify-center md:justify-start'>
@@ -95,7 +96,7 @@ const Sidebar = () => {
 								<p className='text-white font-bold text-sm w-20 truncate'>{data?.nome_completo}</p>
 								<p className='text-slate-500 text-sm'>@{data?.nome_usuario}</p>
 							</div>
-							<BiLogOut className='w-5 h-5 cursor-pointer' 
+							<BiLogOut className='w-5 h-5 cursor-pointer' // botao para dar logout
 								onClick={(e)=> {
 									e.preventDefault();
 									logout();
