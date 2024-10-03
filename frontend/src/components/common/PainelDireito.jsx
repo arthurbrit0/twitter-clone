@@ -1,11 +1,32 @@
 import { Link } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
-import { USERS_FOR_RIGHT_PANEL } from "../../utils/db/dummy";
+import { useQuery } from "@tanstack/react-query";
 
 // componente do painel direito com usuarios sugeridos
 
+
+
 const PainelDireito = () => {
-	const isLoading = false;
+	const {data:usuariosSugeridos, isLoading} = useQuery({
+		queryKey: ['usuariosSugeridos'],
+		queryFn: async () => {
+			try {
+				const res = await fetch("/api/users/sugeridos")
+				const data = await res.json();
+
+				if(!res.ok) {
+					throw new Error(data.message || "Algo deu errado")
+				}
+				return data;
+			} catch (error) {
+				throw new Error(error.message)
+			}
+		}
+	})
+
+	if (usuariosSugeridos?.length === 0) {
+		return <div className='md:w-64 w-o'></div>
+	}
 
 	return (
 		<div className='hidden lg:block my-4 mx-2'>
@@ -22,7 +43,7 @@ const PainelDireito = () => {
 						</>
 					)}
 					{!isLoading && // caso não esteja carregando, vai mapear cada usuario do banco de dados na seguinte funcao
-						USERS_FOR_RIGHT_PANEL?.map((user) => (
+						usuariosSugeridos?.map((user) => (
 							<Link
 								to={`/perfil/${user.nome_usuario}`} // criar um link para os perfis do usuario
 								className='flex items-center justify-between gap-4'
@@ -38,7 +59,7 @@ const PainelDireito = () => {
 										<span className='font-semibold tracking-tight truncate w-28'>
 											{user.nome_completo}
 										</span>
-										<span className='text-sm text-slate-500'>@{user.usuario}</span>
+										<span className='text-sm text-slate-500'>@{user.nome_usuario}</span>
 									</div>
 								</div>
 								<div>
