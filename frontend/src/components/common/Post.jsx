@@ -29,17 +29,17 @@ const Post = ({ post }) => {
 		<>
 			<div className='flex gap-2 items-start p-4 border-b border-gray-700'>
 				<div className='avatar'>
-					<Link to={`/perfil/${postOwner.usuario}`} className='w-8 rounded-full overflow-hidden'>
+					<Link to={`/perfil/${postOwner.nome_suario}`} className='w-8 rounded-full overflow-hidden'>
 						<img src={postOwner.imagem_perfil || "/avatar-placeholder.png"} />
 					</Link>
 				</div>
 				<div className='flex flex-col flex-1'>
 					<div className='flex gap-2 items-center'>
-						<Link to={`/perfil/${postOwner.usuario}`} className='font-bold'>
+						<Link to={`/perfil/${postOwner.nome_usuario}`} className='font-bold'>
 							{postOwner.nome_completo}
 						</Link>
 						<span className='text-gray-700 flex gap-1 text-sm'>
-							<Link to={`/perfil/${postOwner.usuario}`}>@{postOwner.usuario}</Link>
+							<Link to={`/perfil/${postOwner.nome_usuario}`}>@{postOwner.nome_usuario}</Link>
 							<span>·</span>
 							<span>{formattedDate}</span>
 						</span>
@@ -50,10 +50,10 @@ const Post = ({ post }) => {
 						)}
 					</div>
 					<div className='flex flex-col gap-3 overflow-hidden'>
-						<span>{post.text}</span>
-						{post.img && (
+						<span>{post.texto}</span>
+						{post.imagem && (
 							<img
-								src={post.img}
+								src={post.imagem}
 								className='h-80 object-contain rounded-lg border border-gray-700'
 								alt=''
 							/>
