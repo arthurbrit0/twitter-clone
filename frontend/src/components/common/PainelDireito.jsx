@@ -22,7 +22,7 @@ const PainelDireito = () => {
 					{!isLoading &&
 						USERS_FOR_RIGHT_PANEL?.map((user) => (
 							<Link
-								to={`/perfil/${user.usuario}`}
+								to={`/perfil/${user.nome_usuario}`}
 								className='flex items-center justify-between gap-4'
 								key={user._id}
 							>
