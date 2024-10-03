@@ -3,29 +3,60 @@ import { useState } from "react";
 
 import XSvg from "../../../components/svgs/X";
 
+import { toast, Toaster } from 'react-hot-toast';
+
 import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
+import { useMutation } from "@tanstack/react-query";
+
 
 const CadastroPage = () => {
 	const [formData, setFormData] = useState({
 		email: "",
-		usuario: "",
+		nome_usuario: "",
 		nome_completo: "",
 		senha: "",
+	});
+	
+	const { mutate:cadastrar, isError, isPending, error} = useMutation({
+		mutationFn: async({email, nome_usuario, nome_completo, senha}) => {
+			try {
+				const res = await fetch("/api/auth/cadastro", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({email, nome_usuario, nome_completo, senha})
+				})
+	
+				const data = await res.json();
+				if(!res.ok) throw new Error(data.error || "Falha ao criar a conta");
+				console.log(data);
+				return data;
+	
+			} catch (error) {
+				console.error(error)
+				throw error;
+			}
+		},
+		onSuccess: () => {
+			toast.success("Usuário registrado com sucesso!")
+		},
+		onError: (error) => {
+			toast.error("Houve um erro no registro do usuário")
+		}
 	});
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(formData);
+		cadastrar(formData)
 	};
 
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
-
-	const isErro = false;
 
 	return (
 		<div className='max-w-screen-xl mx-auto flex h-screen px-10'>
@@ -54,7 +85,7 @@ const CadastroPage = () => {
 								type='text'
 								className='grow '
 								placeholder='Usuário'
-								name='usuario'
+								name='nome_usuario'
 								onChange={handleInputChange}
 								value={formData.username}
 							/>
@@ -82,8 +113,10 @@ const CadastroPage = () => {
 							value={formData.password}
 						/>
 					</label>
-					<button className='btn rounded-full btn-primary text-white'>Cadastrar</button>
-					{isErro && <p className='text-red-500'>Algo deu errado!</p>}
+					<button className='btn rounded-full btn-primary text-white'>
+						{isPending ? "Carregando..." : "Cadastrar"}
+					</button>
+					{isError && <p className='text-red-500'>Algo deu errado!</p>}
 				</form>
 				<div className='flex flex-col lg:w-2/3 gap-2 mt-4'>
 					<p className='text-white text-lg'>Já tem uma conta?</p>
