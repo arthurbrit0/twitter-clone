@@ -11,11 +11,16 @@ import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { formatMemberSinceDate } from "../../utils/date";
+import useSeguir from "../../hooks/useSeguir";
+import useAtualizarPerfil from "../../hooks/useAtualizarPerfil";
 
 const ProfilePage = () => {
+
+	const queryClient = useQueryClient();
+
 	const [imagem_banner, setCoverImg] = useState(null);
 	const [imagem_perfil, setProfileImg] = useState(null);
 	const [feedType, setFeedType] = useState("posts");
@@ -23,9 +28,9 @@ const ProfilePage = () => {
 	const coverImgRef = useRef(null);
 	const profileImgRef = useRef(null);
 
-	const isMyProfile = true;
-
 	const { nomeDoUsuario } = useParams()
+
+	const { data:authUser } = useQuery({queryKey: ['authUser']})  
 
 	const { data:usuario, isLoading, refetch, isRefecthing } = useQuery({
 		queryKey:['perfilUsuario'],
@@ -45,6 +50,16 @@ const ProfilePage = () => {
 			}
 		}
 	})
+
+	// transformar em custom hook
+
+	const {atualizarPerfil, isAtualizandoPerfil} = useAtualizarPerfil();
+
+	const estouSeguindo = authUser?.seguindo.includes(usuario?._id)
+
+	const isMyProfile = authUser?._id === usuario?._id;
+
+	const {seguir, isPending} = useSeguir();
 
 	useEffect(() => {
 		refetch();
@@ -126,21 +141,28 @@ const ProfilePage = () => {
 								</div>
 							</div>
 							<div className='flex justify-end px-4 mt-5'>
-								{isMyProfile && <EditProfileModal />}
+								{isMyProfile && <EditProfileModal authUser={authUser} />}
 								{!isMyProfile && (
 									<button
 										className='btn btn-outline rounded-full btn-sm'
-										onClick={() => alert("Seguido com sucesso")}
+										onClick={() => seguir(usuario?._id)}
 									>
-										Follow
+										{isPending && "Carregando..."}
+										{!isPending && estouSeguindo && "Seguindo"}
+										{!isPending && !estouSeguindo && "Seguir"}
 									</button>
 								)}
 								{(imagem_banner || imagem_perfil) && (
 									<button
 										className='btn btn-primary rounded-full btn-sm text-white px-4 ml-2'
-										onClick={() => alert("Perfil atualizado com sucesso")}
+										onClick={async () => {
+												await atualizarPerfil({imagem_banner, imagem_perfil})
+												setProfileImg(null)
+												setCoverImg(null)
+											}
+										}
 									>
-										Update
+										{isAtualizandoPerfil ? "Atualizando..." : "Atualizar"}
 									</button>
 								)}
 							</div>

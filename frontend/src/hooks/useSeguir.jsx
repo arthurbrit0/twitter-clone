@@ -14,7 +14,7 @@ const useSeguir = () => {
             
                 const data = res.json();
                 if(!res.ok){
-                    throw new Error(data.message || "Algo deu errado")
+                    throw new Error(data.error || "Algo deu errado")
     
                 }
                 return data;
@@ -24,8 +24,8 @@ const useSeguir = () => {
         },
         onSuccess: () => {
             Promise.all([
-                queryClient.invalidateQueries({queryKey: ['authUser']}),
-                queryClient.invalidateQueries({queryKey: ['usuariosSugeridos']})
+                queryClient.invalidateQueries({queryKey: ['usuariosSugeridos']}),
+                queryClient.invalidateQueries({queryKey: ['authUser']})
             ])
         },
         onError: () => {

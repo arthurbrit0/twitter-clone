@@ -1,19 +1,41 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import useAtualizarPerfil from "../../hooks/useAtualizarPerfil";
 
-const EditProfileModal = () => {
+const EditProfileModal = ({authUser}) => {
 	const [formData, setFormData] = useState({
-		fullName: "",
-		username: "",
+		nome_completo: "",
+		nome_usuario: "",
 		email: "",
 		bio: "",
 		link: "",
-		newPassword: "",
-		currentPassword: "",
+		nova_senha: "",
+		senha: "",
 	});
+
+	const queryClient = useQueryClient();
+
+	// transformar em custom hook
+
+	const {atualizarPerfil, isAtualizandoPerfil } = useAtualizarPerfil()
 
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
+
+	useEffect(() => {
+		if(authUser) {
+			setFormData({
+				nome_completo: authUser.nome_completo,
+				nome_usuario: authUser.nome_usuario,
+				email: authUser.email,
+				bio: authUser.bio,
+				link: authUser.link,
+				senha: "",
+				nova_senha: ""
+			})
+		}
+	},[authUser])
 
 	return (
 		<>
@@ -30,7 +52,7 @@ const EditProfileModal = () => {
 						className='flex flex-col gap-4'
 						onSubmit={(e) => {
 							e.preventDefault();
-							alert("Profile updated successfully");
+							atualizarPerfil(formData);
 						}}
 					>
 						<div className='flex flex-wrap gap-2'>
@@ -38,16 +60,16 @@ const EditProfileModal = () => {
 								type='text'
 								placeholder='Nome Completo'
 								className='flex-1 input border border-gray-700 rounded p-2 input-md'
-								value={formData.fullName}
-								name='fullName'
+								value={formData.nome_completo}
+								name='nome_completo'
 								onChange={handleInputChange}
 							/>
 							<input
 								type='text'
 								placeholder='Usuario'
 								className='flex-1 input border border-gray-700 rounded p-2 input-md'
-								value={formData.username}
-								name='username'
+								value={formData.nome_usuario}
+								name='nome_usuario'
 								onChange={handleInputChange}
 							/>
 						</div>
@@ -73,16 +95,16 @@ const EditProfileModal = () => {
 								type='password'
 								placeholder='Senha Atual'
 								className='flex-1 input border border-gray-700 rounded p-2 input-md'
-								value={formData.currentPassword}
-								name='currentPassword'
+								value={formData.senha}
+								name='senha'
 								onChange={handleInputChange}
 							/>
 							<input
 								type='password'
 								placeholder='Nova Senha'
 								className='flex-1 input border border-gray-700 rounded p-2 input-md'
-								value={formData.newPassword}
-								name='newPassword'
+								value={formData.nova_senha}
+								name='nova_senha'
 								onChange={handleInputChange}
 							/>
 						</div>
@@ -94,7 +116,9 @@ const EditProfileModal = () => {
 							name='link'
 							onChange={handleInputChange}
 						/>
-						<button className='btn btn-primary rounded-full btn-sm text-white'>Atualizar</button>
+						<button className='btn btn-primary rounded-full btn-sm text-white'>
+							{isAtualizandoPerfil ? "Atualizando" : "Atualizar"}
+						</button>
 					</form>
 				</div>
 				<form method='dialog' className='modal-backdrop'>

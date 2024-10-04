@@ -73,7 +73,7 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
         const data = await res.json();
 
         if(!res.ok) {
-          throw new Error(data.message || "Algo deu errado")
+          throw new Error(data.error || "Algo deu errado")
         }
 
         return data // retornando a resposta da requisicao em formato json
@@ -108,7 +108,7 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
 
         const data = await res.json();
         if(!res.ok){
-          throw new Error(data.message)
+          throw new Error(data.error)
         }
 
         return data

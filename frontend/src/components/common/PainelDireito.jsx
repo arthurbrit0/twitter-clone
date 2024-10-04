@@ -17,7 +17,7 @@ const PainelDireito = () => {
 				const data = await res.json();
 
 				if(!res.ok) {
-					throw new Error(data.message || "Algo deu errado")
+					throw new Error(data.error || "Algo deu errado")
 				}
 				return data;
 			} catch (error) {
