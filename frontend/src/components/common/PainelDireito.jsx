@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import { useQuery } from "@tanstack/react-query";
+import LoadingSpinner from "./LoadingSpinner";
+import useSeguir from "../../hooks/useSeguir";
 
 // componente do painel direito com usuarios sugeridos
 
@@ -27,6 +29,8 @@ const PainelDireito = () => {
 	if (usuariosSugeridos?.length === 0) {
 		return <div className='md:w-64 w-o'></div>
 	}
+
+	const { seguir, isPending } = useSeguir();
 
 	return (
 		<div className='hidden lg:block my-4 mx-2'>
@@ -65,9 +69,11 @@ const PainelDireito = () => {
 								<div>
 									<button
 										className='btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm'
-										onClick={(e) => e.preventDefault()}
+										onClick={(e) => {e.preventDefault()
+											seguir(user._id) // usando hook customizado useFollow e usando sua funcao para seguir o usuario caso o botao seja clicado
+										}}
 									>
-										Seguir
+										{isPending ? <LoadingSpinner size='sm' /> : "Seguir"}
 									</button>
 								</div>
 							</Link> // no final, teremos cards com o avatar, usuario e nome, sendo tudo clicavel e redirecionavel para o perfil do user
