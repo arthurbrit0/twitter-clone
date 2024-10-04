@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from "./LoadingSpinner";
+import { formatPostDate } from "../../utils/date"; 
 
 // componente de um unico post
 
@@ -29,7 +30,7 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
 
   const queryClient = useQueryClient(); // criando uma instancia do useQueryClient para manipular o cache
 
-  const { mutate: deletarPost, isLoading: isDeleting, isError, error } = useMutation({
+  const { mutate: deletarPost, isLoading: isDeleting} = useMutation({
     mutationFn: async () => { // usando o mutate para manipular o banco de dados, no caso, deletar um post
       try {
         const res = await fetch(`/api/posts/deletar/${post._id}`, {
@@ -58,14 +59,45 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
     },
   });
 
+  const { mutate: comentarPost, isLoading: isCommenting} = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/posts/comentar/${post._id}`, { // fazendo uma requisicao post para comentar no post passado por props
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ texto: comentario }) // passando no corpo da requisicao o state comentario (no campo texto do post)
+        })
+
+        const data = await res.json();
+
+        if(!res.ok) {
+          throw new Error(data.message || "Algo deu errado")
+        }
+
+        return data // retornando a resposta da requisicao em formato json
+
+      } catch (error) {
+        throw new Error(error.message)
+      }
+    },
+    onSuccess: (novoComentario) => {
+      setComentario(""); // setando o comentario como vazio para futuros comentarios
+      toast.success("Comentário enviado com sucesso!");
+      queryClient.invalidateQueries({queryKey: ['posts']})
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    }
+  })
+
   const postOwner = post.user; // definindo o dono do post como o usuario que fez o post passado na prop
   const isLiked = post.likes.includes(authUser._id); // isLiked começa como false (default)
 
   const isMyPost = authUser && authUser._id === post.user._id; // booleano que indica se o usuario logado é o dono do post
 
-  const formattedDate = "1h"; 
-
-  const isCommenting = false;
+  const formattedDate = formatPostDate(post.createdAt)
 
   const {mutate:likePost, isPending} = useMutation({
     mutationFn: async () => {
@@ -106,6 +138,8 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
 
   const handlePostComment = (e) => {
     e.preventDefault();
+    if(isCommenting) return;
+    comentarPost()
   };
 
   const handleLikePost = () => {
@@ -179,19 +213,19 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
                         <div className='avatar'>
                           <div className='w-8 rounded-full'>
                             <img
-                              src={comentario.user.profileImg || "/avatar-placeholder.png"}
+                              src={comentario.user.imagem_perfil || "/avatar-placeholder.png"}
                               alt="Perfil Comentário"
                             />
                           </div>
                         </div>
                         <div className='flex flex-col'>
                           <div className='flex items-center gap-1'>
-                            <span className='font-bold'>{comentario.user.fullName}</span>
+                            <span className='font-bold'>{comentario.user.nome_completo}</span>
                             <span className='text-gray-700 text-sm'>
-                              @{comentario.user.username}
+                              @{comentario.user.nome_usuario}
                             </span>
                           </div>
-                          <div className='text-sm'>{comentario.text}</div>
+                          <div className='text-sm'>{comentario.texto}</div>
                         </div>
                       </div>
                     ))}
@@ -210,7 +244,7 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
                       {isCommenting ? (
                         <span className='loading loading-spinner loading-md'></span>
                       ) : (
-                        "Post"
+                        "Comentar"
                       )}
                     </button>
                   </form>
