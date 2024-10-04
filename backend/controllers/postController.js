@@ -140,9 +140,9 @@ export const toggleLikePost = async (req, res) => {
         if (isUserLiked) {
             await Post.updateOne({_id: postId}, {$pull: {likes: userId}})
             await User.updateOne({_id: userId}, {$pull: {posts_curtidos: postId}})
-            res.status(200).json({
-                mensagem: "Post descurtido com sucesso"
-            })
+
+            const likesAtualizado = post.likes.filter((id) => id.toString() !== userId.toString());
+            res.status(200).json(likesAtualizado)
         } else {
             // post.likes.push(userId);
             // await post.save();
@@ -156,9 +156,9 @@ export const toggleLikePost = async (req, res) => {
             })
             await notificacao.save();
 
-            res.status(200).json({
-                mensagem: "Post curtido com sucesso"
-            })
+            const postAtualizado = await Post.findById(postId);
+
+            res.status(200).json(postAtualizado.likes)
 
         }
 

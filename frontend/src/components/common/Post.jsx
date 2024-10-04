@@ -59,13 +59,46 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
   });
 
   const postOwner = post.user; // definindo o dono do post como o usuario que fez o post passado na prop
-  const isLiked = false; // isLiked começa como false (default)
+  const isLiked = post.likes.includes(authUser._id); // isLiked começa como false (default)
 
   const isMyPost = authUser && authUser._id === post.user._id; // booleano que indica se o usuario logado é o dono do post
 
   const formattedDate = "1h"; 
 
   const isCommenting = false;
+
+  const {mutate:likePost, isPending} = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/posts/like/${post._id}`, {
+          method: "POST",
+        })
+
+        const data = await res.json();
+        if(!res.ok){
+          throw new Error(data.message)
+        }
+
+        return data
+
+      } catch (error) {
+        throw new Error(error)
+      }
+    },
+    onSuccess: (likesAtualizado) => {
+      queryClient.setQueryData(['posts'], (oldData) => {
+        return oldData.map((p) => {
+          if(p._id === post._id) {
+            return {...p, likes:likesAtualizado}
+          }
+          return p;
+        })
+      })
+    },
+    onError:(error) => {
+      toast.error(error.message)
+    }
+  })
 
   const handleDeletarPost = () => {
     deletarPost(); // essa funcao sera linkada ao botao de deletar 
@@ -76,7 +109,8 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
   };
 
   const handleLikePost = () => {
-	
+    if(isPending) return;
+    likePost();
   };
 
   if (isAuthLoading) return <div>Carregando usuário...</div>;
@@ -190,10 +224,11 @@ const Post = ({ post }) => { // recebe um post, passado como props do componente
                 <span className='text-sm text-slate-500 group-hover:text-green-500'>0</span>
               </div>
               <div className='flex gap-1 items-center group cursor-pointer' onClick={handleLikePost}>
-                {!isLiked && (
+                {isPending && <LoadingSpinner size='sm' />}
+                {!isLiked && !isPending && (
                   <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
                 )}
-                {isLiked && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
+                {isLiked && !isPending && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
 
                 <span
                   className={`text-sm text-slate-500 group-hover:text-pink-500 ${
