@@ -6,6 +6,9 @@ export const getNotificacoes = async (req, res) => {
         const notificacoesDoUsuario = await Notificacao.find({ para: userId }).populate({
             path: 'de',
             select: 'nome_usuario imagem_perfil'
+        }).populate({
+            path: 'para',
+            select: 'nome_usuario imagem_perfil'
         })
 
         await Notificacao.updateMany({para:userId}, {visto: true});

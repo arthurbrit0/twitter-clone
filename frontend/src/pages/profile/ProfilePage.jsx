@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Posts from "../../components/common/Posts";
@@ -11,37 +11,52 @@ import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { formatMemberSinceDate } from "../../utils/date";
 
 const ProfilePage = () => {
-	const [coverImg, setCoverImg] = useState(null);
-	const [profileImg, setProfileImg] = useState(null);
+	const [imagem_banner, setCoverImg] = useState(null);
+	const [imagem_perfil, setProfileImg] = useState(null);
 	const [feedType, setFeedType] = useState("posts");
 
 	const coverImgRef = useRef(null);
 	const profileImgRef = useRef(null);
 
-	const isLoading = false;
 	const isMyProfile = true;
 
-	const user = {
-		_id: "1",
-		fullName: "John Doe",
-		username: "johndoe",
-		profileImg: "/avatars/cara2.png",
-		coverImg: "/cover.png",
-		bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-		link: "https://youtube.com/@asaprogrammer_",
-		following: ["1", "2", "3"],
-		followers: ["1", "2", "3"],
-	};
+	const { nomeDoUsuario } = useParams()
+
+	const { data:usuario, isLoading, refetch, isRefecthing } = useQuery({
+		queryKey:['perfilUsuario'],
+		queryFn: async () => {
+
+			try {
+				const res = await fetch(`/api/users/perfil/${nomeDoUsuario}`)
+				const data = await res.json();
+	
+				if(!res.ok) {
+					throw new Error(data.error || "Algo deu errado")
+				}
+	
+				return data;
+			} catch (error) {
+				throw new Error(error.message)
+			}
+		}
+	})
+
+	useEffect(() => {
+		refetch();
+	}, [nomeDoUsuario, refetch])
 
 	const handleImgChange = (e, state) => {
 		const file = e.target.files[0];
 		if (file) {
 			const reader = new FileReader();
 			reader.onload = () => {
-				state === "coverImg" && setCoverImg(reader.result);
-				state === "profileImg" && setProfileImg(reader.result);
+				state === "imagem_banner" && setCoverImg(reader.result);
+				state === "imagem_perfil" && setProfileImg(reader.result);
 			};
 			reader.readAsDataURL(file);
 		}
@@ -51,10 +66,10 @@ const ProfilePage = () => {
 		<>
 			<div className='flex-[4_4_0]  border-r border-gray-700 min-h-screen '>
 				{/* HEADER */}
-				{isLoading && <ProfileHeaderSkeleton />}
-				{!isLoading && !user && <p className='text-center text-lg mt-4'>Usuário não encontrado</p>}
+				{(isRefecthing || isLoading) && <ProfileHeaderSkeleton />}
+				{!isLoading && !isRefecthing && !usuario && <p className='text-center text-lg mt-4'>Usuário não encontrado</p>}
 				<div className='flex flex-col'>
-					{!isLoading && user && (
+					{!isLoading && !isRefecthing && usuario && (
 						<>
 							<div className='flex gap-10 px-4 py-2 items-center'>
 								<Link to='/'>
@@ -62,13 +77,13 @@ const ProfilePage = () => {
 								</Link>
 								<div className='flex flex-col'>
 									<span className='text-sm text-slate-500'>{POSTS?.length} Posts do </span>
-									<p className='font-bold text-lg'>{user?.fullName}</p>
+									<p className='font-bold text-lg'>{usuario?.nome_completo}</p>
 								</div>
 							</div>
 
 							<div className='relative group/cover'>
 								<img
-									src={coverImg || user?.coverImg || "/cover.png"}
+									src={imagem_banner || usuario?.imagem_banner || "/cover.png"}
 									className='h-52 w-full object-cover'
 									alt='cover image'
 								/>
@@ -86,19 +101,19 @@ const ProfilePage = () => {
 									hidden
                                     accept='image/*'
 									ref={coverImgRef}
-									onChange={(e) => handleImgChange(e, "coverImg")}
+									onChange={(e) => handleImgChange(e, "imagem_banner")}
 								/>
 								<input
 									type='file'
 									hidden
                                     accept='image/*'
 									ref={profileImgRef}
-									onChange={(e) => handleImgChange(e, "profileImg")}
+									onChange={(e) => handleImgChange(e, "imagem_perfil")}
 								/>
 
 								<div className='avatar absolute -bottom-16 left-4'>
 									<div className='w-32 rounded-full relative group/avatar'>
-										<img src={profileImg || user?.profileImg || "/avatar-placeholder.png"} />
+										<img src={imagem_perfil || usuario?.imagem_perfil || "/avatar-placeholder.png"} />
 										<div className='absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer'>
 											{isMyProfile && (
 												<MdEdit
@@ -120,7 +135,7 @@ const ProfilePage = () => {
 										Follow
 									</button>
 								)}
-								{(coverImg || profileImg) && (
+								{(imagem_banner || imagem_perfil) && (
 									<button
 										className='btn btn-primary rounded-full btn-sm text-white px-4 ml-2'
 										onClick={() => alert("Perfil atualizado com sucesso")}
@@ -132,13 +147,13 @@ const ProfilePage = () => {
 
 							<div className='flex flex-col gap-4 mt-14 px-4'>
 								<div className='flex flex-col'>
-									<span className='font-bold text-lg'>{user?.fullName}</span>
-									<span className='text-sm text-slate-500'>@{user?.username}</span>
-									<span className='text-sm my-1'>{user?.bio}</span>
+									<span className='font-bold text-lg'>{usuario?.nome_completo}</span>
+									<span className='text-sm text-slate-500'>@{usuario?.nome_completo}</span>
+									<span className='text-sm my-1'>{usuario?.bio}</span>
 								</div>
 
 								<div className='flex gap-2 flex-wrap'>
-									{user?.link && (
+									{usuario?.link && (
 										<div className='flex gap-1 items-center '>
 											<>
 												<FaLink className='w-3 h-3 text-slate-500' />
@@ -155,16 +170,18 @@ const ProfilePage = () => {
 									)}
 									<div className='flex gap-2 items-center'>
 										<IoCalendarOutline className='w-4 h-4 text-slate-500' />
-										<span className='text-sm text-slate-500'>Entrou em Julho de 2021</span>
+										<span className='text-sm text-slate-500'>
+											{formatMemberSinceDate(usuario?.createdAt)}
+										</span>
 									</div>
 								</div>
 								<div className='flex gap-2'>
 									<div className='flex gap-1 items-center'>
-										<span className='font-bold text-xs'>{user?.following.length}</span>
+										<span className='font-bold text-xs'>{usuario?.seguindo.length}</span>
 										<span className='text-slate-500 text-xs'>Seguindo</span>
 									</div>
 									<div className='flex gap-1 items-center'>
-										<span className='font-bold text-xs'>{user?.followers.length}</span>
+										<span className='font-bold text-xs'>{usuario?.seguidores.length}</span>
 										<span className='text-slate-500 text-xs'>Seguidores</span>
 									</div>
 								</div>
@@ -192,7 +209,7 @@ const ProfilePage = () => {
 						</>
 					)}
 
-					<Posts />
+					<Posts feedType={feedType} nome_usuario={nomeDoUsuario} userId={usuario?._id} />
 				</div>
 			</div>
 		</>

@@ -55,7 +55,7 @@ function App() {
           <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />}/> {/* de fetch retornar um usuario, ele podera acessar as rotas da aplicacoa */}
           <Route path='/cadastro' element={!authUser ? <CadastroPage /> : <Navigate to='/' />}/> {/* Se o usuario não estiver logado, e tentar acecssar a home, ele é direcionado para a pag de login */}
           <Route path='/notificacoes' element={authUser ? <NotificationPage />: <Navigate to='/login'/> } /> {/* Se o usuário já estiver logado e tentar acessar o login ou o cadastro, ele é direcionado para ahome */}
-          <Route path='/perfil/:usuario' element={authUser ? <ProfilePage /> : <Navigate to='/login'/> }/>
+          <Route path='/perfil/:nomeDoUsuario' element={authUser ? <ProfilePage /> : <Navigate to='/login'/> }/>
         </Routes>
       {authUser && <PainelDireito />}
       <Toaster />

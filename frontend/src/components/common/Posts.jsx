@@ -3,13 +3,18 @@ import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-const Posts = ({ feedType }) => { // Posts recebe feedType como prop, que vem do componente Home
+const Posts = ({ feedType, nome_usuario, userId }) => { // Posts recebe feedType como prop, que vem do componente Home
+
   const getPostEndpoint = () => { // selecionando o post do endpoint para os casos das secoes para voce e seguindo
     switch (feedType) {
       case "forYou":
         return '/api/posts/todos';
       case "following":
         return '/api/posts/seguindo';
+      case "posts":
+        return `/api/posts/user/${nome_usuario}`;
+      case "likes":
+        return `/api/posts/likes/${userId}`
       default:
         return '/api/posts/todos';
     }
@@ -38,7 +43,7 @@ const Posts = ({ feedType }) => { // Posts recebe feedType como prop, que vem do
 
   useEffect(() => {
     refetch(); // para cada vez que a secao do feed for atualizada, a query sera requisitada novamente
-  }, [feedType, refetch]);
+  }, [feedType, refetch, nome_usuario]);
 
   return (
     <>
