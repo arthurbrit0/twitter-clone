@@ -2,7 +2,7 @@ FROM node:14-alpine AS builder
 
 WORKDIR /usr/src/app
 
-COPY ../package.json ../package-lock.json ./
+COPY ./package*.json ./
 
 RUN npm install
 
